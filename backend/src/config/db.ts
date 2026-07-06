@@ -14,7 +14,7 @@ export async function connectDB(): Promise<typeof mongoose> {
     return conn;
   } catch (error) {
     console.error('MongoDB connection error:', error);
-    process.exit(1);
+    throw error;
   }
 }
 

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { env } from './config/env';
+import { connectDB } from './config/db';
 import { errorHandler } from './middlewares/errorHandler';
 import authRoutes from './routes/authRoutes';
 import onboardingRoutes from './routes/onboardingRoutes';
@@ -18,6 +19,11 @@ const app = express();
 
 app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
 app.use(express.json());
+
+app.use(async (_req, _res, next) => {
+  await connectDB();
+  next();
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/ai', onboardingRoutes);
