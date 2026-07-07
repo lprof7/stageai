@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../../context/ToastContext';
-import { getCv, updateCv, deleteCv } from '../../../data/repositories/cvRepository';
+import { getCv, updateCv, deleteCv, reprocessCv } from '../../../data/repositories/cvRepository';
 import { Button } from '../../shared/components/Button';
 import { Input } from '../../shared/components/Input';
 import { Loader } from '../../shared/components/Loader';
@@ -24,6 +24,7 @@ export function CVDetailPage() {
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -65,6 +66,21 @@ export function CVDetailPage() {
       showToast(t('common.error'), 'error');
     }
     setDeleting(false);
+  }
+
+  async function handleReprocess() {
+    if (!id) return;
+    setReprocessing(true);
+    try {
+      const updated = await reprocessCv(id);
+      setSkills(updated.extractedSkills);
+      setCv(updated);
+      showToast('تم استخراج المهارات بنجاح', 'success');
+    } catch (err) {
+      console.error('[CVDetailPage] reprocessCv error:', err);
+      showToast('فشلت إعادة الاستخراج، حاول مرة أخرى', 'error');
+    }
+    setReprocessing(false);
   }
 
   function addSkill() {
@@ -113,14 +129,25 @@ export function CVDetailPage() {
           }}>
             {t('student.extractedSkills')}
           </label>
-          <div style={{
-            display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-xs)',
-            marginBottom: 'var(--spacing-sm)',
-          }}>
-            {skills.map((skill) => (
-              <SkillChip key={skill} label={skill} onRemove={() => removeSkill(skill)} />
-            ))}
-          </div>
+          {skills.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 'var(--spacing-lg)' }}>
+              <p style={{ color: 'var(--color-on-surface-variant)', marginBottom: 'var(--spacing-md)' }}>
+                لم يتم استخراج المهارات تلقائياً
+              </p>
+              <Button size="sm" onClick={handleReprocess} loading={reprocessing}>
+                إعادة استخراج المهارات
+              </Button>
+            </div>
+          ) : (
+            <div style={{
+              display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-xs)',
+              marginBottom: 'var(--spacing-sm)',
+            }}>
+              {skills.map((skill) => (
+                <SkillChip key={skill} label={skill} onRemove={() => removeSkill(skill)} />
+              ))}
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
             <Input
               label=""

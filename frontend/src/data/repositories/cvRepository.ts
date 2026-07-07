@@ -24,6 +24,11 @@ export async function updateCv(id: string, data: { name?: string; extractedSkill
   return res.data;
 }
 
+export async function reprocessCv(id: string): Promise<Cv> {
+  const res = await httpClient.post(`/cvs/${id}/reprocess`);
+  return res.data;
+}
+
 export async function deleteCv(id: string): Promise<void> {
   await httpClient.delete(`/cvs/${id}`);
 }

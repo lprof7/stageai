@@ -10,6 +10,7 @@ router.use(auth, requireRole('student'));
 router.get('/', cvController.listCvs);
 router.post('/', upload.single('pdf'), cvController.createCv, handleMulterError);
 router.get('/:id', cvController.getCv);
+router.post('/:id/reprocess', cvController.reprocessCv);
 router.put('/:id', cvController.updateCv);
 router.delete('/:id', cvController.deleteCv);
 

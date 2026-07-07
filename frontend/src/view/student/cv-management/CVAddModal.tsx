@@ -38,10 +38,11 @@ export function CVAddModal({ open, onClose, onCreated }: CVAddModalProps) {
       onClose();
       setName('');
       setFile(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('[CVAddModal] createCv error:', err);
-      setError(t('common.error'));
-      showToast(t('common.error'), 'error');
+      const msg = err.response?.data?.message || t('common.error');
+      setError(msg);
+      showToast(msg, 'error');
     }
     setLoading(false);
   }
